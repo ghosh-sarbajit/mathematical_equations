@@ -1,4 +1,6 @@
-# Mislenious_Info
+# My own equations
+
+# Inspired by GrafEq
 
 http://www.peda.com/grafeq/
 
