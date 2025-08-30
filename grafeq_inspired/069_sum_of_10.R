@@ -1,5 +1,6 @@
 # Load the necessary library
 library(ggplot2)
+library(svglite)
 
 # 1. SET UP THE GRID
 # Define the range and resolution for x and y coordinates
@@ -28,7 +29,7 @@ calculate_sum <- function(x, y) {
 grid$value <- calculate_sum(grid$x, grid$y)
 
 # 4. CREATE THE PLOT
-ggplot(grid, aes(x = x, y = y, fill = value > 0)) +
+myplot <- ggplot(grid, aes(x = x, y = y, fill = value > 0)) +
   geom_raster() +
   coord_fixed(ratio = 1) + # Ensures the plot is not stretched
   scale_fill_manual(
@@ -42,3 +43,37 @@ ggplot(grid, aes(x = x, y = y, fill = value > 0)) +
     y = "y-axis"
   ) +
   theme_minimal()
+
+
+print(myplot)
+# --- Lines Added to Save the Graph ---
+
+# Determine the script name for the output file
+# This finds the name of the script being run.
+# It works when you run the script from the command line (e.g., Rscript my_script.R)
+# or by clicking "Source" in RStudio.
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("--file=", args, value = TRUE)
+
+# Set a default name in case the script name can't be found (e.g., running line-by-line)
+if (length(file_arg) == 0) {
+  script_name <- "output_plot"
+  cat("Could not determine script name. Saving plot as 'output_plot.svg'\n")
+} else {
+  # Extract the base name of the script, without the ".R" extension
+  script_path <- sub("--file=", "", file_arg)
+  script_name <- tools::file_path_sans_ext(basename(script_path))
+}
+
+# 7. Save the combined plot to an SVG file
+svg_filename <- paste0(script_name, ".svg")
+
+ggsave(
+  filename = svg_filename,
+  plot = myplot,
+  device = 'svg',
+  width = 10, # You can adjust the width
+  height = 5  # You can adjust the height
+)
+
+cat("Graph successfully saved to:", svg_filename, "\n")

@@ -1,5 +1,6 @@
 library(ggplot2)
 library(patchwork)
+library(svglite)
 
 # 1. Define range and create a data frame grid
 # expand.grid is the standard tidyverse/ggplot way to create the grid
@@ -42,5 +43,41 @@ p2 <- ggplot(df, aes(x = x, y = y, fill = Z2)) +
   theme_minimal() +
   coord_fixed() # Ensures the aspect ratio is 1:1
 
-# 5. Arrange plots side-by-side using patchwork
-p1 + p2
+# 5. Arrange plots and assign to a variable
+combined_plot <- p1 + p2
+
+# Display the plot in the plot pane
+print(combined_plot)
+
+
+# --- Lines Added to Save the Graph ---
+
+# Determine the script name for the output file
+# This finds the name of the script being run.
+# It works when you run the script from the command line (e.g., Rscript my_script.R)
+# or by clicking "Source" in RStudio.
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("--file=", args, value = TRUE)
+
+# Set a default name in case the script name can't be found (e.g., running line-by-line)
+if (length(file_arg) == 0) {
+  script_name <- "output_plot"
+  cat("Could not determine script name. Saving plot as 'output_plot.svg'\n")
+} else {
+  # Extract the base name of the script, without the ".R" extension
+  script_path <- sub("--file=", "", file_arg)
+  script_name <- tools::file_path_sans_ext(basename(script_path))
+}
+
+# 7. Save the combined plot to an SVG file
+svg_filename <- paste0(script_name, ".svg")
+
+ggsave(
+  filename = svg_filename,
+  plot = combined_plot,
+  device = 'svg',
+  width = 10, # You can adjust the width
+  height = 5  # You can adjust the height
+)
+
+cat("Graph successfully saved to:", svg_filename, "\n")
